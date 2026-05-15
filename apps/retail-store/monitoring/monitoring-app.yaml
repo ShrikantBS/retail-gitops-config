@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-monitoring
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://prometheus-community.github.io/helm-charts'
+    chart: kube-prometheus-stack
+    targetRevision: 69.3.1 # Uses a stable, reliable version of the monitoring stack
+    helm:
+      values: |
+        grafana:
+          adminPassword: "admin" # Sets a simple local dashboard password
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring # Installs it in a dedicated monitoring namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true # Tells ArgoCD to build the monitoring namespace automatically
